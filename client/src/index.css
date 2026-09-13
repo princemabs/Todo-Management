@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg-deep: #070a12;
+  --color-bg-space: #0a0f1d;
+  --color-electric: #0066ff;
+  --color-vibrant: #00d2ff;
+  --color-neon: #00f0ff;
+  --color-muted: #8ba3c7;
+  --color-text: #e8f4ff;
+  --shadow-glow-cyan: 0 0 20px rgba(0, 240, 255, 0.35);
+  --shadow-glow-blue: 0 0 24px rgba(0, 102, 255, 0.4);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  background: radial-gradient(ellipse at top, #0a0f1d 0%, #070a12 55%, #050810 100%);
+  color: var(--color-text);
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+input,
+select,
+textarea {
+  touch-action: manipulation;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 210, 255, 0.25);
+  border-radius: 4px;
+}
+
+.scroll-area-thin::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scroll-area-thin::-webkit-scrollbar-thumb {
+  background: rgba(0, 210, 255, 0.2);
+}
+
+.glass-panel {
+  background: rgba(10, 15, 29, 0.65);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 240, 255, 0.12);
+  border-radius: 12px;
+}
+
+.neon-hover {
+  transition: box-shadow 0.25s ease, border-color 0.25s ease, transform 0.2s ease;
+}
+
+.neon-hover:hover {
+  border-color: rgba(0, 240, 255, 0.45);
+  box-shadow: var(--shadow-glow-cyan);
+}
+
+.priority-critical {
+  border-color: rgba(239, 68, 68, 0.6) !important;
+  box-shadow: 0 0 18px rgba(239, 68, 68, 0.35), 0 0 28px rgba(0, 102, 255, 0.25);
+}
