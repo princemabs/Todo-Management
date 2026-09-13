@@ -22,13 +22,40 @@ function queueWrite(fn) {
   return writeQueue;
 }
 
+async function ensureDir(dir) {
+  try {
+    await fs.access(dir);
+  } catch {
+    await fs.mkdir(dir, { recursive: true });
+  }
+}
+
+export function getPlannerDataPath() {
+  return DATA_PATH;
+}
+
 export async function ensureDataFile() {
   try {
     await fs.access(DATA_PATH);
+    return;
   } catch {
-    await fs.mkdir(path.dirname(DATA_PATH), { recursive: true });
-    await fs.writeFile(DATA_PATH, JSON.stringify(DEFAULT_DATA, null, 2), 'utf-8');
+    /* create below */
   }
+
+  const dir = path.dirname(DATA_PATH);
+  try {
+    await ensureDir(dir);
+  } catch (err) {
+    if (err.code === 'EACCES' || err.code === 'EPERM') {
+      throw new Error(
+        `[planner] Cannot write to ${dir}. On Render: remove PLANNER_DATA_PATH to use repo data/ ` +
+          `(ephemeral), OR add a Persistent Disk mounted at ${dir} before setting PLANNER_DATA_PATH.`
+      );
+    }
+    throw err;
+  }
+
+  await fs.writeFile(DATA_PATH, JSON.stringify(DEFAULT_DATA, null, 2), 'utf-8');
 }
 
 export async function readPlanner() {

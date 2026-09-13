@@ -26,13 +26,23 @@ Pousse le projet sur **GitHub** (ou GitLab).
 | **Start Command** | `node src/index.js` |
 | **Instance type** | Free ou paid |
 
-### 3. Disque persistant (important)
+### 3. Stockage des données (2 options)
 
-Sans disque, `planner.json` est **effacé** à chaque redéploiement.
+#### Option A — Plan free (sans disque) — le plus simple pour démarrer
 
-1. Dans le service → **Disks** → **Add disk**
+- **Ne définis pas** `PLANNER_DATA_PATH` sur Render.
+- Les tâches vont dans `data/planner.json` à la racine du repo (chemin writable).
+- **Inconvénient :** les données peuvent être **perdues** à chaque redéploiement.
+
+#### Option B — Disque persistant (recommandé en prod)
+
+1. Dans le service → **Disks** → **Add disk** (souvent plan payant Render).
 2. **Mount path** : `/var/data`
-3. **Size** : 1 Go suffit
+3. **Size** : 1 Go
+4. **Redéploie** le service après avoir ajouté le disque.
+5. Ensuite seulement, ajoute la variable `PLANNER_DATA_PATH=/var/data/planner.json`.
+
+> Erreur `EACCES: permission denied, mkdir '/var/data'` → tu as mis `PLANNER_DATA_PATH` **sans** disque monté. Supprime la variable **ou** ajoute le disque d’abord.
 
 ### 4. Variables d’environnement (Render)
 
@@ -46,9 +56,9 @@ Dans **Environment** :
 | `CROSS_ORIGIN` | `true` |
 | `EDITOR_USERNAME` | ton identifiant éditeur |
 | `EDITOR_PASSWORD` | mot de passe fort |
-| `PLANNER_DATA_PATH` | `/var/data/planner.json` |
+| `PLANNER_DATA_PATH` | *(Option B uniquement)* `/var/data/planner.json` |
 
-4. **Save** → premier déploiement.
+5. **Save** → déploiement (ou **Manual Deploy**).
 
 ### 5. URL de l’API
 
