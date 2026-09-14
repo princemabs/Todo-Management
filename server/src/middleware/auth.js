@@ -28,9 +28,19 @@ export function createSessionToken() {
   return sign({ role: 'editor', exp: Date.now() + TOKEN_TTL_MS });
 }
 
+export function getSessionTokenFromRequest(req) {
+  const fromCookie = req.cookies?.[SESSION_COOKIE];
+  if (fromCookie) return fromCookie;
+
+  const header = req.headers.authorization;
+  if (typeof header === 'string' && header.startsWith('Bearer ')) {
+    return header.slice(7).trim();
+  }
+  return null;
+}
+
 export function requireEditor(req, res, next) {
-  const token = req.cookies?.[SESSION_COOKIE];
-  const payload = verify(token);
+  const payload = verify(getSessionTokenFromRequest(req));
   if (!payload) {
     return res.status(401).json({ error: 'Editor authentication required' });
   }
@@ -39,8 +49,7 @@ export function requireEditor(req, res, next) {
 }
 
 export function isEditor(req) {
-  const token = req.cookies?.[SESSION_COOKIE];
-  return !!verify(token);
+  return !!verify(getSessionTokenFromRequest(req));
 }
 
 export { SESSION_COOKIE };

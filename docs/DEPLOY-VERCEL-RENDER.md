@@ -132,6 +132,7 @@ Redéploie le service Render après changement de `CLIENT_ORIGIN`.
 | Symptôme | Cause probable | Action |
 |----------|----------------|--------|
 | Erreur CORS | `CLIENT_ORIGIN` ≠ URL Vercel | Corriger et redéployer Render |
+| Login OK mais pas éditeur (surtout mobile) | Cookies cross-site bloqués | Redéployer front + back : login renvoie un **token** (`Authorization: Bearer`) stocké en localStorage |
 | Login OK mais pas éditeur | Cookie bloqué | `CROSS_ORIGIN=true`, HTTPS partout |
 | API lente au 1er hit | Render free sleep | Attendre ou plan payant |
 | Données perdues | Pas de disk | Disk `/var/data` + `PLANNER_DATA_PATH` |

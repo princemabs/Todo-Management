@@ -16,7 +16,8 @@ router.post('/login', (req, res) => {
   }
   const token = createSessionToken();
   res.cookie(SESSION_COOKIE, token, sessionCookieOptions());
-  res.json({ ok: true, isEditor: true });
+  // Token in body for mobile browsers that block cross-site cookies (Vercel + Render)
+  res.json({ ok: true, isEditor: true, token });
 });
 
 router.post('/logout', (_req, res) => {

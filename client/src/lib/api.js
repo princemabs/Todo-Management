@@ -1,9 +1,15 @@
+import { getEditorToken, setEditorToken } from './editorToken';
+
 const base = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
 
 async function request(path, options = {}) {
+  const headers = { 'Content-Type': 'application/json', ...options.headers };
+  const token = getEditorToken();
+  if (token) headers.Authorization = `Bearer ${token}`;
+
   const res = await fetch(`${base}${path}`, {
     credentials: 'include',
-    headers: { 'Content-Type': 'application/json', ...options.headers },
+    headers,
     ...options,
   });
   const data = await res.json().catch(() => ({}));
@@ -14,8 +20,18 @@ async function request(path, options = {}) {
 export const api = {
   auth: {
     me: () => request('/api/auth/me'),
-    login: (body) => request('/api/auth/login', { method: 'POST', body: JSON.stringify(body) }),
-    logout: () => request('/api/auth/logout', { method: 'POST' }),
+    login: async (body) => {
+      const data = await request('/api/auth/login', { method: 'POST', body: JSON.stringify(body) });
+      if (data.token) setEditorToken(data.token);
+      return data;
+    },
+    logout: async () => {
+      try {
+        await request('/api/auth/logout', { method: 'POST' });
+      } finally {
+        setEditorToken(null);
+      }
+    },
   },
   tasks: {
     list: (from, to) => request(`/api/tasks?from=${from}&to=${to}`),

@@ -1,6 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { api } from '../lib/api';
-
 const EditorAuthContext = createContext(null);
 
 export function EditorAuthProvider({ children }) {
@@ -23,9 +22,10 @@ export function EditorAuthProvider({ children }) {
   }, [refresh]);
 
   const login = useCallback(async (username, password) => {
-    await api.auth.login({ username, password });
-    setIsEditor(true);
-  }, []);
+    const data = await api.auth.login({ username, password });
+    setIsEditor(Boolean(data.isEditor));
+    await refresh();
+  }, [refresh]);
 
   const logout = useCallback(async () => {
     await api.auth.logout();
