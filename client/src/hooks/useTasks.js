@@ -6,17 +6,18 @@ export function useTasks(from, to) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (opts = {}) => {
     if (!from || !to) return;
-    setLoading(true);
+    const silent = opts.silent === true;
+    if (!silent) setLoading(true);
     setError(null);
     try {
       const { tasks: list } = await api.tasks.list(from, to);
-      setTasks(list);
+      setTasks(Array.isArray(list) ? list : []);
     } catch (e) {
-      setError(e.message);
+      setError(e.message || 'Impossible de charger les tâches');
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, [from, to]);
 
@@ -24,21 +25,36 @@ export function useTasks(from, to) {
     load();
   }, [load]);
 
+  useEffect(() => {
+    function onVisible() {
+      if (document.visibilityState === 'visible') load({ silent: true });
+    }
+    document.addEventListener('visibilitychange', onVisible);
+    window.addEventListener('focus', onVisible);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener('focus', onVisible);
+    };
+  }, [load]);
+
   const createTask = async (body) => {
     const { task } = await api.tasks.create(body);
-    await load();
+    setTasks((prev) => [...prev.filter((t) => t.id !== task.id), task]);
+    await load({ silent: true });
     return task;
   };
 
   const updateTask = async (id, body) => {
     const { task } = await api.tasks.update(id, body);
-    await load();
+    setTasks((prev) => prev.map((t) => (t.id === id ? task : t)));
+    await load({ silent: true });
     return task;
   };
 
   const deleteTask = async (id) => {
     await api.tasks.remove(id);
-    await load();
+    setTasks((prev) => prev.filter((t) => t.id !== id));
+    await load({ silent: true });
   };
 
   return { tasks, loading, error, reload: load, createTask, updateTask, deleteTask };

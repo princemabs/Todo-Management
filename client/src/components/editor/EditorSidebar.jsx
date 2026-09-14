@@ -75,7 +75,18 @@ export function EditorSidebar({
 
         <div className="scroll-area-thin max-h-none overflow-visible p-3 sm:max-h-[min(420px,45dvh)] sm:overflow-y-auto sm:overscroll-contain sm:p-4 sm:pt-3">
           {loading && <p className="text-sm text-muted">Chargement…</p>}
-          {error && <p className="text-sm text-red-400">{error}</p>}
+          {error && (
+            <div className="mb-3 rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">
+              <p>{error}</p>
+              <button
+                type="button"
+                className="mt-2 text-neon underline"
+                onClick={() => window.location.reload()}
+              >
+                Recharger la page
+              </button>
+            </div>
+          )}
 
           <ul className="space-y-3">
             {filtered.map((task) => (

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -13,12 +13,29 @@ export function PublicTodayPage() {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    api.public
+  const load = useCallback(() => {
+    setError(null);
+    return api.public
       .today()
       .then(setData)
       .catch((e) => setError(e.message));
   }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  useEffect(() => {
+    function refresh() {
+      if (document.visibilityState === 'visible') load();
+    }
+    document.addEventListener('visibilitychange', refresh);
+    window.addEventListener('focus', refresh);
+    return () => {
+      document.removeEventListener('visibilitychange', refresh);
+      window.removeEventListener('focus', refresh);
+    };
+  }, [load]);
 
   const displayDate = data ? parseISODate(data.displayDate) : new Date();
   const dateLabel = format(displayDate, 'EEEE d MMMM yyyy', { locale: fr });

@@ -3,3 +3,8 @@ dist/
 .env
 *.log
 .DS_Store
+
+# Données runtime prod (Render) — ne pas versionner le fichier live
+server/data/planner.json
+server/data/planner.json.bak
+server/data/planner.json.tmp

@@ -28,21 +28,28 @@ Pousse le projet sur **GitHub** (ou GitLab).
 
 ### 3. Stockage des données (2 options)
 
-#### Option A — Plan free (sans disque) — le plus simple pour démarrer
+#### Option A — Plan free (sans disque)
 
-- **Ne définis pas** `PLANNER_DATA_PATH` sur Render.
-- Les tâches vont dans `data/planner.json` à la racine du repo (chemin writable).
-- **Inconvénient :** les données peuvent être **perdues** à chaque redéploiement.
+- **Ne définis pas** `PLANNER_DATA_PATH`.
+- Fichier live : `server/data/planner.json` sur le serveur (JSON, pas de base de données).
+- Sauvegarde automatique : `planner.json.bak` à chaque écriture.
+- **Limite Render :** à chaque **redéploiement**, le disque éphémère peut être réinitialisé → tâches perdues si tu n’as pas de disque.
 
-#### Option B — Disque persistant (recommandé en prod)
+#### Option B — Disque persistant (recommandé)
 
-1. Dans le service → **Disks** → **Add disk** (souvent plan payant Render).
-2. **Mount path** : `/var/data`
-3. **Size** : 1 Go
-4. **Redéploie** le service après avoir ajouté le disque.
-5. Ensuite seulement, ajoute la variable `PLANNER_DATA_PATH=/var/data/planner.json`.
+1. **Disks** → Add disk → mount **`/var/data`**
+2. Redéploie le service
+3. Le serveur détecte `/var/data` automatiquement **ou** tu mets `PLANNER_DATA_PATH=/var/data/planner.json`
 
-> Erreur `EACCES: permission denied, mkdir '/var/data'` → tu as mis `PLANNER_DATA_PATH` **sans** disque monté. Supprime la variable **ou** ajoute le disque d’abord.
+> Ne mets `PLANNER_DATA_PATH=/var/data/...` **sans** disque monté (erreur EACCES).
+
+#### Vérifier les données après deploy
+
+```text
+GET https://TON-API.onrender.com/api/data-info
+```
+
+→ `taskCount`, `path`, `meta` (confirme où sont stockées les tâches).
 
 ### 4. Variables d’environnement (Render)
 
