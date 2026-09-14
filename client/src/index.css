@@ -28,6 +28,9 @@ body {
   background: radial-gradient(ellipse at top, #0a0f1d 0%, #070a12 55%, #050810 100%);
   color: var(--color-text);
   -webkit-tap-highlight-color: transparent;
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  overscroll-behavior-y: none;
 }
 
 button,
@@ -66,9 +69,17 @@ textarea {
   transition: box-shadow 0.25s ease, border-color 0.25s ease, transform 0.2s ease;
 }
 
-.neon-hover:hover {
-  border-color: rgba(0, 240, 255, 0.45);
-  box-shadow: var(--shadow-glow-cyan);
+@media (hover: hover) {
+  .neon-hover:hover {
+    border-color: rgba(0, 240, 255, 0.45);
+    box-shadow: var(--shadow-glow-cyan);
+  }
+}
+
+@media (hover: none) {
+  .neon-hover:active {
+    border-color: rgba(0, 240, 255, 0.35);
+  }
 }
 
 .priority-critical {

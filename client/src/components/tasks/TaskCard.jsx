@@ -12,9 +12,8 @@ export function TaskCard({ task, isEditor, onEdit, onDelete }) {
 
   return (
     <motion.article
-      layout
-      initial={{ opacity: 0, scale: 0.98 }}
-      animate={{ opacity: 1, scale: 1 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
       className={cn(
         'glass-panel neon-hover p-3 sm:p-4',
         task.priority === 'critical' && 'priority-critical'

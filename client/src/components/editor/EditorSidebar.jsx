@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { ListTodo, PenLine } from 'lucide-react';
 import { TaskForm } from '../tasks/TaskForm';
 import { TaskCard } from '../tasks/TaskCard';
@@ -26,10 +26,10 @@ export function EditorSidebar({
   return (
     <aside className="flex min-w-0 flex-col gap-4 lg:sticky lg:top-4 lg:self-start">
       {isEditor ? (
-        <motion.div
-          layout
+        <div
+          id="editor-form-panel"
           className={cn(
-            'rounded-xl border border-neon/20 shadow-glow-cyan',
+            'scroll-mt-4 rounded-xl border border-neon/20 shadow-glow-cyan',
             editing && 'ring-1 ring-neon/40'
           )}
         >
@@ -45,18 +45,21 @@ export function EditorSidebar({
             onSubmit={async (form) => {
               await onSave(form);
               setEditing(null);
+              if (typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches) {
+                document.getElementById('task-list-panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
             }}
             onCancel={editing ? () => setEditing(null) : undefined}
             embedded
           />
-        </motion.div>
+        </div>
       ) : (
         <p className="glass-panel p-4 text-sm leading-relaxed text-muted">
           Mode lecture seule. Connectez-vous en mode éditeur pour ajouter ou modifier des tâches.
         </p>
       )}
 
-      <section className="glass-panel flex min-h-0 flex-col overflow-hidden">
+      <section id="task-list-panel" className="glass-panel flex min-h-0 scroll-mt-4 flex-col">
         <header className="flex shrink-0 items-center justify-between gap-3 border-b border-neon/10 px-3 py-3 sm:px-4">
           <h2 className="flex min-w-0 flex-1 items-center gap-2 text-sm font-semibold text-vibrant">
             <ListTodo size={18} className="shrink-0" aria-hidden />
@@ -70,31 +73,28 @@ export function EditorSidebar({
           </span>
         </header>
 
-        <div className="scroll-area-thin max-h-[min(420px,45dvh)] overflow-y-auto overscroll-contain p-3 sm:p-4 sm:pt-3">
+        <div className="scroll-area-thin max-h-none overflow-visible p-3 sm:max-h-[min(420px,45dvh)] sm:overflow-y-auto sm:overscroll-contain sm:p-4 sm:pt-3">
           {loading && <p className="text-sm text-muted">Chargement…</p>}
           {error && <p className="text-sm text-red-400">{error}</p>}
 
           <ul className="space-y-3">
-            <AnimatePresence mode="popLayout">
-              {filtered.map((task) => (
-                <li key={task.id}>
-                  <TaskCard
-                    task={task}
-                    isEditor={isEditor}
-                    onEdit={setEditing}
-                    onDelete={onDelete}
-                  />
-                </li>
-              ))}
-            </AnimatePresence>
+            {filtered.map((task) => (
+              <li key={task.id}>
+                <TaskCard
+                  task={task}
+                  isEditor={isEditor}
+                  onEdit={(t) => {
+                    setEditing(t);
+                    document.getElementById('editor-form-panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }}
+                  onDelete={onDelete}
+                />
+              </li>
+            ))}
           </ul>
 
           {!loading && filtered.length === 0 && (
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="py-6 text-center text-sm text-muted"
-            >
+            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="py-6 text-center text-sm text-muted">
               Aucune tâche sur cette période.
             </motion.p>
           )}

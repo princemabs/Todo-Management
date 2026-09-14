@@ -33,22 +33,43 @@ function FormSection({ title, children, className }) {
 
 export function TaskForm({ focusDate, initial, onSubmit, onCancel, embedded = false }) {
   const [form, setForm] = useState(initial || empty(focusDate));
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState(null);
+
+  const editingId = initial?.id ?? null;
 
   useEffect(() => {
-    setForm(initial || empty(focusDate));
-  }, [initial, focusDate]);
+    if (initial) setForm({ ...initial });
+    else setForm(empty(focusDate));
+  }, [editingId]);
+
+  useEffect(() => {
+    if (!initial) {
+      setForm((f) => ({ ...f, date: formatDateISO(focusDate) }));
+    }
+  }, [focusDate, initial]);
 
   const hours = durationHours(form.startTime, form.endTime);
 
   function setField(key, value) {
+    setSaveError(null);
     setForm((f) => ({ ...f, [key]: value }));
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
-    if (!form.title.trim()) return;
-    onSubmit(form);
-    if (!initial) setForm(empty(focusDate));
+    if (!form.title.trim() || hours <= 0 || saving) return;
+
+    setSaving(true);
+    setSaveError(null);
+    try {
+      await onSubmit(form);
+      if (!initial) setForm(empty(focusDate));
+    } catch (err) {
+      setSaveError(err.message || 'Enregistrement impossible');
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -71,6 +92,7 @@ export function TaskForm({ focusDate, initial, onSubmit, onCancel, embedded = fa
             onChange={(e) => setField('title', e.target.value)}
             required
             className="min-h-11"
+            enterKeyHint="next"
           />
         </div>
         <div>
@@ -80,6 +102,7 @@ export function TaskForm({ focusDate, initial, onSubmit, onCancel, embedded = fa
             value={form.description}
             onChange={(e) => setField('description', e.target.value)}
             className="min-h-[72px]"
+            enterKeyHint="done"
           />
         </div>
       </FormSection>
@@ -150,17 +173,29 @@ export function TaskForm({ focusDate, initial, onSubmit, onCancel, embedded = fa
           type="checkbox"
           checked={form.publishOnPublicView}
           onChange={(e) => setField('publishOnPublicView', e.target.checked)}
-          className="mt-0.5 size-4 shrink-0 accent-electric"
+          className="mt-1 size-5 shrink-0 accent-electric"
         />
         <span>Inclure dans la vue publique /today lorsque la journée est publiée</span>
       </label>
 
+      {saveError && <p className="text-sm text-red-400">{saveError}</p>}
+
       <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-        <Button type="submit" disabled={hours <= 0} className="min-h-11 w-full sm:w-auto sm:flex-1">
-          Enregistrer
+        <Button
+          type="submit"
+          disabled={hours <= 0 || saving}
+          className="min-h-12 w-full text-base sm:min-h-11 sm:w-auto sm:flex-1 sm:text-sm"
+        >
+          {saving ? 'Enregistrement…' : 'Enregistrer'}
         </Button>
         {onCancel && (
-          <Button type="button" variant="ghost" onClick={onCancel} className="min-h-11 w-full sm:w-auto">
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={onCancel}
+            disabled={saving}
+            className="min-h-12 w-full text-base sm:min-h-11 sm:w-auto sm:text-sm"
+          >
             Annuler
           </Button>
         )}
